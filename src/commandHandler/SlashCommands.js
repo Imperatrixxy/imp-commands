@@ -41,7 +41,6 @@ class SlashCommands {
 
         if (oldCommand) {
             const {
-                nameLocalizations: oldNameLoc,
                 description: oldDescription,
                 defaultMemberPermissions: oldDefaultPerms,
                 dmPermission: oldDMPermission,
