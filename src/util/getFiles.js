@@ -1,7 +1,8 @@
 const fs = require('fs');
+const path = require('path');
 
-function getFiles(path, foldersOnly = false) {
-    const files = fs.readdirSync(path, {
+function getFiles(filePath, foldersOnly = false) {
+    const files = fs.readdirSync(filePath, {
         withFileTypes: true,
     });
 
@@ -9,7 +10,7 @@ function getFiles(path, foldersOnly = false) {
     let theFiles = [];
 
     for(const file of files) {
-        const fileName = `${path}\\${file.name}`;
+        const fileName = path.join(filePath, file.name);
         if (file.isDirectory()) {
             if (foldersOnly) {
                 theFiles.push(fileName);

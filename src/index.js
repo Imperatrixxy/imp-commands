@@ -1,14 +1,22 @@
-const db = require('mongoose')
+const db = require('mongoose');
 const CommandHandler = require('./commandHandler/CommandHandler');
 const Cooldowns = require('./util/Cooldowns');
 const EventHandler = require('./eventHandler/EventHandler');
 const path = require('path');
+const replyType = require('./util/replyType');
+const isLegacy = require('./util/isLegacy');
+const FeatureHandler = require('./util/FeatureHandler');
 
-class ImpCommands {
-    constructor({
+class ImpHandler {
+    constructor(stuff) {
+        this.init(stuff)
+    }
+
+    async init({
         client,
         mongoUri,
         commandsDir,
+        featuresDir,
         events = {},
         devServers = [],
         botOwners = [],
@@ -37,13 +45,21 @@ class ImpCommands {
         }
 
         if (mongoUri) {
-            this.connectToMongo(mongoUri);
+            await this.connectToMongo(mongoUri);
         }
 
         if (commandsDir) {
             this._commandHandler = new CommandHandler(
                 this,
                 path.join(process.cwd(), commandsDir),
+                client
+            );
+        }
+
+        if (featuresDir) {
+            new FeatureHandler(
+                this,
+                path.join(process.cwd(), featuresDir),
                 client
             );
         }
@@ -83,11 +99,13 @@ class ImpCommands {
         return this._validations;
     }
 
-    connectToMongo(mongoUri) {
-        db.connect(mongoUri, {
+    async connectToMongo(mongoUri) {
+        await db.connect(mongoUri, {
             keepAlive: true
         });
     }
 }
 
-module.exports.ImpCommands = ImpCommands;
+module.exports = ImpHandler;
+module.exports.replyType = replyType;
+module.exports.isLegacy = isLegacy;

@@ -18,7 +18,10 @@ class EventHandler {
         this._builtInEvents = {
             interactionCreate: {
                 isButton: (interaction) => interaction.isButton(),
-                isCommand: (interaction) => interaction.type == InteractionType.ApplicationCommand,
+                isCommand: (interaction) =>
+                    interaction.type === InteractionType.ApplicationCommand ||
+                    interaction.type === InteractionType.ApplicationCommandAutocomplete,
+                isContextMenu: (interaction) => interaction.isContextMenuCommand(),
             },
             messageCreate: {
                 isHuman: (message) => !message.author.bot,

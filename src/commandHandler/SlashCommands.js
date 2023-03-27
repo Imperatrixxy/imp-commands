@@ -1,3 +1,5 @@
+const { ApplicationCommandType } = require("discord.js");
+
 class SlashCommands {
     constructor(client) {
         this._client = client;
@@ -28,18 +30,41 @@ class SlashCommands {
                 option.type !== previous.type ||
                 option.description !== previous.description
             ) return true;
+            
+            if(option.choices || previous.choices){
+                if(!option.choices?.length !== !previous.choices?.length) return true;
+
+                for(let i = 0; i < option.choices.length; i++) {
+                    const choice = option.choices[i];
+                    const oldChoice = previous.choices[i];
+
+                    if(
+                        choice.name !== oldChoice.name ||
+                        choice.value !== oldChoice.value
+                    ) return true;
+                }
+            }
+            
+
+            if(!option.options && !previous.options) continue;
+
+            if(
+                option.options?.length !== previous.options?.length ||
+                this.compareOptions(option.options, previous.options)
+            ) return true;
         }
 
         return false;
     }
 
-    async create(name, nameLocalizations, description, descriptionLocalizations, defaultMemberPermissions, dmPermission, options, guildId) {
+    async create(name, nameLocalizations, type, description, descriptionLocalizations, defaultMemberPermissions, dmPermission, options, guildId) {
 
         const commands = await this.getCommands(guildId);
         const oldCommand = commands.cache.find((cmd) => cmd.name === name);
         defaultMemberPermissions = defaultMemberPermissions.bitfield;
 
         if (oldCommand) {
+            let updateCmd = false;
             const {
                 description: oldDescription,
                 defaultMemberPermissions: oldDefaultPerms,
@@ -47,17 +72,27 @@ class SlashCommands {
                 options: oldOptions
             } = oldCommand;
 
+            if (!type || type === ApplicationCommandType.ChatInput) {
+                if(description !== oldDescription) updateCmd = true;
+            }
+
+            if(
+                oldDMPermission !== null &&
+                dmPermission !== oldDMPermission
+            ) updateCmd = true;
+
             if (
-                description !== oldDescription ||
                 defaultMemberPermissions !== oldDefaultPerms.bitfield ||
-                dmPermission !== oldDMPermission ||
                 options.length !== oldOptions.length ||
                 this.compareOptions(options, oldOptions)
-            ) {
+            ) updateCmd = true;
+            
+            if (updateCmd) {
                 console.log(`Updating the ${name} command...`);
 
                 await commands.edit(oldCommand.id, {
                     nameLocalizations,
+                    type,
                     description,
                     descriptionLocalizations,
                     defaultMemberPermissions,
@@ -72,6 +107,7 @@ class SlashCommands {
         await commands.create({
             name,
             nameLocalizations,
+            type,
             description,
             descriptionLocalizations,
             defaultMemberPermissions,

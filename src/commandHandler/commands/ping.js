@@ -5,8 +5,12 @@ module.exports = {
 	nameLocalizations: {
 		ja: 'ピン',
 	},
+	permissions: [
+		PermissionFlagsBits.Administrator
+	],
 	deferReply: true,
 	//disabled: true,
+	legacy: 'both',
 	description: 'Tests the bot latency',
 	descriptionLocalizations: {
 		da: 'Tester bottens latenstid',
@@ -21,8 +25,21 @@ module.exports = {
 	 * 
 	 * @param {CommandInteraction} interaction
 	 */
-	async execute({ interaction }) {
-		const pingMSG = await interaction.fetchReply();
-        return `Pong! The message round-trip took ${pingMSG.createdTimestamp - interaction.createdTimestamp}ms.\nThe heartbeat ping is ${interaction.client.ws.ping}ms.`;
+	async execute({ message, interaction, client }) {
+		let pingMsg;
+		if(interaction){
+			pingMsg = await interaction.fetchReply();
+		} else {
+			pingMsg = await message.reply({ content: 'Pinging...', allowedMentions: { repliedUser: false } });
+		}
+
+		const latency = pingMsg.createdTimestamp - (interaction ? interaction.createdTimestamp : message.createdTimestamp);
+		const pong = `Pong! The message round-trip took ${latency}ms.\nThe heartbeat ping is ${client.ws.ping}ms.`;
+
+		if(message) {
+			pingMsg.edit({ content: pong, allowedMentions: { repliedUser: false } });
+			return;
+		}
+        return pong;
 	}
 }

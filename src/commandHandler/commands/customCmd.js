@@ -3,6 +3,7 @@ const { PermissionFlagsBits, ApplicationCommandOptionType: Type } = require('dis
 module.exports = {
     name: 'customcmd',
     description: 'Set up custom commands',
+    legacy: false,
     defaultMemberPermissions: [PermissionFlagsBits.Administrator],
     options: [
         {
@@ -44,9 +45,7 @@ module.exports = {
             ]
         }
     ],
-    async execute ({ interaction, instance }) {
-        const { guild, options } = interaction;
-        //const [ commandName, description, response ] = args;
+    async execute ({ interaction, instance, guild, options }) {
         const method = options.getSubcommand();
 
         if (method === 'create'){

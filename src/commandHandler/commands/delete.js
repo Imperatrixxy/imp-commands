@@ -1,4 +1,4 @@
-const { CommandInteraction, PermissionFlagsBits, ApplicationCommandOptionType: Type } = require('discord.js');
+const { PermissionFlagsBits, ApplicationCommandOptionType: Option } = require('discord.js');
 
 module.exports = {
     name: 'delete',
@@ -12,7 +12,8 @@ module.exports = {
         de: 'Löscht die Anzahl X von Nachrichten'
     },
     deferReply: 'ephemeral',
-    defaultMemberPermissions: [
+    legacy: 'both',
+    permissions: [
         PermissionFlagsBits.ManageMessages
     ],
     options: [
@@ -26,7 +27,7 @@ module.exports = {
             descriptionLocalizations: {
                 'sv-SE': 'Antal meddelanden att radera, mellan 1 och 99',
             },
-            type: Type.Number,
+            type: Option.Number,
             required: true
         },
         {
@@ -39,17 +40,13 @@ module.exports = {
             descriptionLocalizations: {
                 'sv-SE': 'Användare vars meddelanden du vill radera.',
             },
-            type: Type.User,
+            type: Option.User,
         }
     ],
-    /**
-     * 
-     * @param {CommandInteraction} interaction
-     */
-    async execute({ interaction }) {
-        const clearAmount = interaction.options.getNumber('amount');
-        const clearTarget = interaction.options.getMember('target');
-        const { channel } = interaction;
+    async execute({ guild, args, channel }) {
+        
+        const clearAmount = args[0];
+        const clearTarget = guild.members.cache.get(args[1]);
         
         if (isNaN(clearAmount) || clearAmount < 1 || clearAmount > 99) {
             return 'Please input a valid amount, will you?';

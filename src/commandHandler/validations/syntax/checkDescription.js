@@ -1,5 +1,11 @@
+const { ApplicationCommandType: Type } = require('discord.js');
+
 module.exports = (command) => {
-    const { commandObject: { description }, commandName } = command;
+    const { commandObject: { description, type, legacy }, commandName } = command;
+
+    if(legacy === true) return;
+
+    if (type === Type.Message || type === Type.User) return;
 
     if(!description) {
         throw new Error(commandName, `The command is missing a description. Please provide one!`);
